@@ -3,6 +3,7 @@ start_server {tags {"protocol network"}} {
         reconnect
         r write "\r\n"
         r flush
+        r hello 3
         assert_equal "PONG" [r ping]
     }
 

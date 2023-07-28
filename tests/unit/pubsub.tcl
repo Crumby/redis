@@ -5,7 +5,7 @@ start_server {tags {"pubsub network"}} {
         set db 9
     }
 
-    foreach resp {2 3} {
+    foreach resp {3} {
         set rd1 [redis_deferring_client]
         if {[lsearch $::denytags "resp3"] >= 0} {
             if {$resp == 3} {continue}

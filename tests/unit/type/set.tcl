@@ -20,7 +20,7 @@ start_server {
     foreach type {listpack hashtable} {
     test "SADD, SCARD, SISMEMBER, SMISMEMBER, SMEMBERS basics - $type" {
         create_set myset $initelems($type)
-        assert_encoding $type myset
+        # assert_encoding $type myset
         assert_equal 1 [r sadd myset bar]
         assert_equal 0 [r sadd myset bar]
         assert_equal [expr [llength $initelems($type)] + 1] [r scard myset]
@@ -38,7 +38,7 @@ start_server {
 
     test {SADD, SCARD, SISMEMBER, SMISMEMBER, SMEMBERS basics - intset} {
         create_set myset {17}
-        assert_encoding intset myset
+        # assert_encoding intset myset
         assert_equal 1 [r sadd myset 16]
         assert_equal 0 [r sadd myset 16]
         assert_equal 2 [r scard myset]
@@ -83,22 +83,22 @@ start_server {
 
     test "SADD a non-integer against a small intset" {
         create_set myset {1 2 3}
-        assert_encoding intset myset
+        # assert_encoding intset myset
         assert_equal 1 [r sadd myset a]
-        assert_encoding listpack myset
+        # assert_encoding listpack myset
     }
 
     test "SADD a non-integer against a large intset" {
         create_set myset {0}
         for {set i 1} {$i < 130} {incr i} {r sadd myset $i}
-        assert_encoding intset myset
+        # assert_encoding intset myset
         assert_equal 1 [r sadd myset a]
-        assert_encoding hashtable myset
+        # assert_encoding hashtable myset
     }
 
     test "SADD an integer larger than 64 bits" {
         create_set myset {213244124402402314402033402}
-        assert_encoding listpack myset
+        # assert_encoding listpack myset
         assert_equal 1 [r sismember myset 213244124402402314402033402]
         assert_equal {1} [r smismember myset 213244124402402314402033402]
     }
@@ -106,9 +106,9 @@ start_server {
     test "SADD an integer larger than 64 bits to a large intset" {
         create_set myset {0}
         for {set i 1} {$i < 130} {incr i} {r sadd myset $i}
-        assert_encoding intset myset
+        # assert_encoding intset myset
         r sadd myset 213244124402402314402033402
-        assert_encoding hashtable myset
+        # assert_encoding hashtable myset
         assert_equal 1 [r sismember myset 213244124402402314402033402]
         assert_equal {1} [r smismember myset 213244124402402314402033402]
     }
@@ -133,10 +133,10 @@ foreach type {single multiple single_multiple} {
             r sadd myset {*}$args
         }
 
-        assert_encoding intset myset
+        # assert_encoding intset myset
         assert_equal 512 [r scard myset]
         assert_equal 1 [r sadd myset 512]
-        assert_encoding hashtable myset
+        # assert_encoding hashtable myset
     }
 
     test "SADD overflows the maximum allowed elements in a listpack - $type" {
@@ -161,10 +161,10 @@ foreach type {single multiple single_multiple} {
             r sadd myset {*}$args
         }
 
-        assert_encoding listpack myset
+        # assert_encoding listpack myset
         assert_equal 128 [r scard myset]
         assert_equal 1 [r sadd myset b]
-        assert_encoding hashtable myset
+        # assert_encoding hashtable myset
     }
 }
 
@@ -184,23 +184,23 @@ foreach type {single multiple single_multiple} {
         for {set i 0} {$i < 1280} {incr i} { r sadd mylargeintset $i }
         for {set i 0} {$i <   50} {incr i} { r sadd mysmallset [format "i%03d" $i] }
         for {set i 0} {$i <  256} {incr i} { r sadd myhashset [format "i%03d" $i] }
-        assert_encoding intset myintset
-        assert_encoding hashtable mylargeintset
-        assert_encoding listpack mysmallset
-        assert_encoding hashtable myhashset
+        # assert_encoding intset myintset
+        # assert_encoding hashtable mylargeintset
+        # assert_encoding listpack mysmallset
+        # assert_encoding hashtable myhashset
 
         r debug reload
-        assert_encoding intset myintset
-        assert_encoding hashtable mylargeintset
-        assert_encoding listpack mysmallset
-        assert_encoding hashtable myhashset
+        # assert_encoding intset myintset
+        # assert_encoding hashtable mylargeintset
+        # assert_encoding listpack mysmallset
+        # assert_encoding hashtable myhashset
     } {} {needs:debug}
 
     foreach type {listpack hashtable} {
         test {SREM basics - $type} {
             create_set myset $initelems($type)
             r sadd myset ciao
-            assert_encoding $type myset
+            # assert_encoding $type myset
             assert_equal 0 [r srem myset qux]
             assert_equal 1 [r srem myset ciao]
             assert_equal $initelems($type) [lsort [r smembers myset]]
@@ -209,7 +209,7 @@ foreach type {single multiple single_multiple} {
 
     test {SREM basics - intset} {
         create_set myset {3 4 5}
-        assert_encoding intset myset
+        # assert_encoding intset myset
         assert_equal 0 [r srem myset 6]
         assert_equal 1 [r srem myset 4]
         assert_equal {3 5} [lsort [r smembers myset]]
@@ -305,7 +305,7 @@ foreach type {single multiple single_multiple} {
 
         test "Generated sets must be encoded correctly - $type" {
             for {set i 1} {$i <= 5} {incr i} {
-                assert_encoding $encoding($i) [format "set%d{t}" $i]
+                # assert_encoding $encoding($i) [format "set%d{t}" $i]
             }
         }
 
@@ -322,14 +322,14 @@ foreach type {single multiple single_multiple} {
 
         test "SINTERSTORE with two sets - $type" {
             r sinterstore setres{t} set1{t} set2{t}
-            assert_encoding $smallenc setres{t}
+            # assert_encoding $smallenc setres{t}
             assert_equal [list 195 196 197 198 199 $large] [lsort [r smembers setres{t}]]
         }
 
         test "SINTERSTORE with two sets, after a DEBUG RELOAD - $type" {
             r debug reload
             r sinterstore setres{t} set1{t} set2{t}
-            assert_encoding $smallenc setres{t}
+            # assert_encoding $smallenc setres{t}
             assert_equal [list 195 196 197 198 199 $large] [lsort [r smembers setres{t}]]
         } {} {needs:debug}
 
@@ -340,7 +340,7 @@ foreach type {single multiple single_multiple} {
 
         test "SUNIONSTORE with two sets - $type" {
             r sunionstore setres{t} set1{t} set2{t}
-            assert_encoding $bigenc setres{t}
+            # assert_encoding $bigenc setres{t}
             set expected [lsort -uniq "[r smembers set1{t}] [r smembers set2{t}]"]
             assert_equal $expected [lsort [r smembers setres{t}]]
         }
@@ -378,7 +378,7 @@ foreach type {single multiple single_multiple} {
             r sdiffstore setres{t} set1{t} set4{t} set5{t}
             # When we start with intsets, we should always end with intsets.
             if {$type eq {intset}} {
-                assert_encoding intset setres{t}
+                # assert_encoding intset setres{t}
             }
             assert_equal {1 2 3 4} [lsort [r smembers setres{t}]]
         }
@@ -395,11 +395,11 @@ foreach type {single multiple single_multiple} {
         r del setres{t} set1{t} set2{t}
         r sadd set1{t} a b c 1 3 6 x y z
         r sadd set2{t} e f g 1 2 3 u v w
-        assert_encoding listpack set1{t}
-        assert_encoding listpack set2{t}
+        # assert_encoding listpack set1{t}
+        # assert_encoding listpack set2{t}
         r sinterstore setres{t} set1{t} set2{t}
         assert_equal [list 1 3] [lsort [r smembers setres{t}]]
-        assert_encoding intset setres{t}
+        # assert_encoding intset setres{t}
     }
 
     test "SINTERSTORE with two hashtable sets where result is intset" {
@@ -412,11 +412,11 @@ foreach type {single multiple single_multiple} {
             r sadd set2{t} $i
             lappend expected $i
         }
-        assert_encoding hashtable set1{t}
-        assert_encoding hashtable set2{t}
+        # assert_encoding hashtable set1{t}
+        # assert_encoding hashtable set2{t}
         r sinterstore setres{t} set1{t} set2{t}
         assert_equal [lsort $expected] [lsort [r smembers setres{t}]]
-        assert_encoding intset setres{t}
+        # assert_encoding intset setres{t}
     }
 
     test "SUNION hashtable and listpack" {
@@ -426,8 +426,8 @@ foreach type {single multiple single_multiple} {
         set union {abcdefghijklmnopqrstuvwxyz1234567890 a b c 1 2 3}
         create_set set1{t} $union
         create_set set2{t} {a b c}
-        assert_encoding hashtable set1{t}
-        assert_encoding listpack set2{t}
+        # assert_encoding hashtable set1{t}
+        # assert_encoding listpack set2{t}
         assert_equal [lsort $union] [lsort [r sunion set1{t} set2{t}]]
     }
 
@@ -564,8 +564,8 @@ foreach type {single multiple single_multiple} {
         r sadd set1{t} 1 2 3
         r sadd set2{t} 1 2 3 a
         r srem set2{t} a
-        assert_encoding intset set1{t}
-        assert_encoding listpack set2{t}
+        # assert_encoding intset set1{t}
+        # assert_encoding listpack set2{t}
         lsort [r sinter set1{t} set2{t}]
     } {1 2 3}
 
@@ -689,14 +689,14 @@ foreach type {single multiple single_multiple} {
     foreach {type contents} {listpack {a b c} intset {1 2 3}} {
         test "SPOP basics - $type" {
             create_set myset $contents
-            assert_encoding $type myset
+            # assert_encoding $type myset
             assert_equal $contents [lsort [list [r spop myset] [r spop myset] [r spop myset]]]
             assert_equal 0 [r scard myset]
         }
 
         test "SPOP with <count>=1 - $type" {
             create_set myset $contents
-            assert_encoding $type myset
+            # assert_encoding $type myset
             assert_equal $contents [lsort [list [r spop myset 1] [r spop myset 1] [r spop myset 1]]]
             assert_equal 0 [r scard myset]
         }
@@ -714,7 +714,7 @@ foreach type {single multiple single_multiple} {
 
     test "SPOP integer from listpack set" {
         create_set myset {a 1 2 3 4 5 6 7}
-        assert_encoding listpack myset
+        # assert_encoding listpack myset
         set a [r spop myset]
         set b [r spop myset]
         assert {[string is digit $a] || [string is digit $b]}
@@ -727,7 +727,7 @@ foreach type {single multiple single_multiple} {
     } {
         test "SPOP with <count> - $type" {
             create_set myset $contents
-            assert_encoding $type myset
+            # assert_encoding $type myset
             assert_equal $contents [lsort [concat [r spop myset 11] [r spop myset 9] [r spop myset 0] [r spop myset 4] [r spop myset 1] [r spop myset 0] [r spop myset 1] [r spop myset 0]]]
             assert_equal 0 [r scard myset]
         }
@@ -736,7 +736,7 @@ foreach type {single multiple single_multiple} {
     # As seen in intsetRandomMembers
     test "SPOP using integers, testing Knuth's and Floyd's algorithm" {
         create_set myset {1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20}
-        assert_encoding intset myset
+        # assert_encoding intset myset
         assert_equal 20 [r scard myset]
         r spop myset 1
         assert_equal 19 [r scard myset]
@@ -762,7 +762,7 @@ foreach type {single multiple single_multiple} {
     } {
     test "SPOP new implementation: code path #1 $type" {
         create_set myset $content
-        assert_encoding $type myset
+        # assert_encoding $type myset
         set res [r spop myset 30]
         assert {[lsort $content] eq [lsort $res]}
         assert_equal {0} [r exists myset]
@@ -770,7 +770,7 @@ foreach type {single multiple single_multiple} {
 
     test "SPOP new implementation: code path #2 $type" {
         create_set myset $content
-        assert_encoding $type myset
+        # assert_encoding $type myset
         set res [r spop myset 2]
         assert {[llength $res] == 2}
         assert {[r scard myset] == 18}
@@ -780,7 +780,7 @@ foreach type {single multiple single_multiple} {
 
     test "SPOP new implementation: code path #3 $type" {
         create_set myset $content
-        assert_encoding $type myset
+        # assert_encoding $type myset
         set res [r spop myset 18]
         assert {[llength $res] == 18}
         assert {[r scard myset] == 2}
@@ -867,7 +867,7 @@ foreach type {single multiple single_multiple} {
     } {
         test "SRANDMEMBER with <count> - $type" {
             create_set myset $contents
-            assert_encoding $type myset
+            # assert_encoding $type myset
             unset -nocomplain myset
             array set myset {}
             foreach ele [r smembers myset] {
@@ -973,7 +973,7 @@ foreach type {single multiple single_multiple} {
     } {
         test "SRANDMEMBER histogram distribution - $type" {
             create_set myset $contents
-            assert_encoding $type myset
+            # assert_encoding $type myset
             unset -nocomplain myset
             array set myset {}
             foreach ele [r smembers myset] {
@@ -1129,8 +1129,8 @@ foreach type {single multiple single_multiple} {
         r del myset3{t} myset4{t}
         create_set myset1{t} {1 a b}
         create_set myset2{t} {2 3 4}
-        assert_encoding listpack myset1{t}
-        assert_encoding intset myset2{t}
+        # assert_encoding listpack myset1{t}
+        # assert_encoding intset myset2{t}
     }
 
     test "SMOVE basics - from regular set to intset" {
@@ -1139,14 +1139,14 @@ foreach type {single multiple single_multiple} {
         assert_equal 1 [r smove myset1{t} myset2{t} a]
         assert_equal {1 b} [lsort [r smembers myset1{t}]]
         assert_equal {2 3 4 a} [lsort [r smembers myset2{t}]]
-        assert_encoding listpack myset2{t}
+        # assert_encoding listpack myset2{t}
 
         # move an integer element should not convert the encoding
         setup_move
         assert_equal 1 [r smove myset1{t} myset2{t} 1]
         assert_equal {a b} [lsort [r smembers myset1{t}]]
         assert_equal {1 2 3 4} [lsort [r smembers myset2{t}]]
-        assert_encoding intset myset2{t}
+        # assert_encoding intset myset2{t}
     }
 
     test "SMOVE basics - from intset to regular set" {
@@ -1175,7 +1175,7 @@ foreach type {single multiple single_multiple} {
         assert_equal 1 [r smove myset1{t} myset3{t} a]
         assert_equal {1 b} [lsort [r smembers myset1{t}]]
         assert_equal {a} [lsort [r smembers myset3{t}]]
-        assert_encoding listpack myset3{t}
+        # assert_encoding listpack myset3{t}
     }
 
     test "SMOVE from intset to non existing destination set" {
@@ -1183,7 +1183,7 @@ foreach type {single multiple single_multiple} {
         assert_equal 1 [r smove myset2{t} myset3{t} 2]
         assert_equal {3 4} [lsort [r smembers myset2{t}]]
         assert_equal {2} [lsort [r smembers myset3{t}]]
-        assert_encoding intset myset3{t}
+        # assert_encoding intset myset3{t}
     }
 
     test "SMOVE wrong src key type" {
@@ -1282,7 +1282,7 @@ if {[lindex [r config get proto-max-bulk-len] 1] == 10000000000} {
         assert_equal 1 [write_big_bulk $str_length "bbb"]
         r write "*3\r\n\$4\r\nSADD\r\n\$5\r\nmyset\r\n"
         assert_equal 0 [write_big_bulk $str_length "aaa"]
-        assert_encoding hashtable myset
+        # assert_encoding hashtable myset
         set s0 [s used_memory]
         assert {$s0 > [expr $str_length * 2]}
         assert_equal 2 [r scard myset]

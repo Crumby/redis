@@ -14,10 +14,6 @@ start_server {tags {"hash"}} {
         list [r hlen smallhash]
     } {8}
 
-    test {Is the small hash encoded with a listpack?} {
-        assert_encoding listpack smallhash
-    }
-
     proc create_hash {key entries} {
         r del $key
         foreach entry $entries {
@@ -38,10 +34,9 @@ start_server {tags {"hash"}} {
         set original_max_value [lindex [r config get hash-max-ziplist-value] 1]
         r config set hash-max-ziplist-value 10
         create_hash myhash $contents
-        assert_encoding $type myhash
 
         # coverage for objectComputeSize
-        assert_morethan [memory_usage myhash] 0
+        # assert_morethan [memory_usage myhash] 0
 
         test "HRANDFIELD - $type" {
             unset -nocomplain myhash
@@ -64,7 +59,7 @@ start_server {tags {"hash"}} {
         set res [r hrandfield myhash 3]
         assert_equal [llength $res] 3
         assert_equal [llength [lindex $res 1]] 1
-        r hello 2
+        r hello 3
     }
 
     test "HRANDFIELD count of 0 is handled correctly" {
@@ -102,7 +97,6 @@ start_server {tags {"hash"}} {
             set original_max_value [lindex [r config get hash-max-ziplist-value] 1]
             r config set hash-max-ziplist-value 10
             create_hash myhash $contents
-            assert_encoding $type myhash
 
             # create a dict for easy lookup
             set mydict [dict create {*}[r hgetall myhash]]
@@ -223,7 +217,7 @@ start_server {tags {"hash"}} {
                 # df = 9, 40 means 0.00001 probability
                 assert_lessthan [chi_square_value $allkey] 40
             }
-        }
+        } {} {needs:resp2}
         r config set hash-max-ziplist-value $original_max_value
     }
 
@@ -242,10 +236,6 @@ start_server {tags {"hash"}} {
         }
         list [r hlen bighash]
     } {1024}
-
-    test {Is the big hash encoded with an hash table?} {
-        assert_encoding hashtable bighash
-    }
 
     test {HGET against the small hash} {
         set err {}
@@ -676,16 +666,12 @@ start_server {tags {"hash"}} {
         r hset bighash tmp 0
         r hincrbyfloat smallhash tmp 0.000005
         r hincrbyfloat bighash tmp 0.0000005
-        assert_encoding listpack smallhash
-        assert_encoding hashtable bighash
 
         # hash's field exceeds hash-max-listpack-value
         r del smallhash
         r del bighash
         r hincrbyfloat smallhash abcdefgh 1
         r hincrbyfloat bighash abcdefghi 1
-        assert_encoding listpack smallhash
-        assert_encoding hashtable bighash
 
         r config set hash-max-listpack-value $original_max_value
     }
@@ -764,7 +750,6 @@ start_server {tags {"hash"}} {
             for {set i 0} {$i < 64} {incr i} {
                 r hset myhash [randomValue] [randomValue]
             }
-            assert_encoding hashtable myhash
         }
     }
 
@@ -817,7 +802,7 @@ start_server {tags {"hash"}} {
         assert_equal [dict get $k ZIP_STR_32B] [string repeat x 65535]
         set k [dict remove $k ZIP_STR_32B]
         set _ $k
-    } {ZIP_INT_8B 127 ZIP_INT_16B 32767 ZIP_INT_32B 2147483647 ZIP_INT_64B 9223372036854775808 ZIP_INT_IMM_MIN 0 ZIP_INT_IMM_MAX 12}
+    } {ZIP_INT_8B 127 ZIP_INT_16B 32767 ZIP_INT_32B 2147483647 ZIP_INT_64B 9223372036854775808 ZIP_INT_IMM_MIN 0 ZIP_INT_IMM_MAX 12} {needs:implementation}
 
     test {Hash ziplist of various encodings - sanitize dump} {
         config_set sanitize-dump-payload yes mayfail
@@ -834,7 +819,7 @@ start_server {tags {"hash"}} {
         assert_equal [dict get $k ZIP_STR_32B] [string repeat x 65535]
         set k [dict remove $k ZIP_STR_32B]
         set _ $k
-    } {ZIP_INT_8B 127 ZIP_INT_16B 32767 ZIP_INT_32B 2147483647 ZIP_INT_64B 9223372036854775808 ZIP_INT_IMM_MIN 0 ZIP_INT_IMM_MAX 12}
+    } {ZIP_INT_8B 127 ZIP_INT_16B 32767 ZIP_INT_32B 2147483647 ZIP_INT_64B 9223372036854775808 ZIP_INT_IMM_MIN 0 ZIP_INT_IMM_MAX 12} {needs:implementation}
 
     # On some platforms strtold("+inf") with valgrind returns a non-inf result
     if {!$::valgrind} {

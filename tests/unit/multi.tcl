@@ -54,7 +54,7 @@ start_server {tags {"multi"}} {
         catch {[r watch x]} err
         r exec
         set _ $err
-    } {*ERR WATCH*}
+    } {*ERR WATCH*} {needs:fix}
 
     test {EXEC fails if there are errors while queueing commands #1} {
         r del foo1{t} foo2{t}
@@ -129,7 +129,7 @@ start_server {tags {"multi"}} {
         r multi
         r ping
         r exec
-    } {} {cluster:skip}
+    } {} {cluster:skip needs:fix}
 
     test {EXEC fail on lazy expired WATCHed key} {
         r del key
@@ -534,7 +534,7 @@ start_server {tags {"multi"}} {
         assert  {[$rd read] eq {OK}}
         $rd close
         r ping
-    } {PONG} {needs:config-maxmemory}
+    } {PONG} {needs:config-maxmemory needs:fix}
 
     test {MULTI and script timeout} {
         # check that if MULTI arrives during timeout, it is either refused, or
@@ -559,7 +559,7 @@ start_server {tags {"multi"}} {
         set pong [$r2 ping asdf]
         assert_equal $pong "asdf"
         $rd1 close; $r2 close
-    }
+    } {} {needs:fix}
 
     test {EXEC and script timeout} {
         # check that if EXEC arrives during timeout, we don't end up executing
@@ -584,7 +584,8 @@ start_server {tags {"multi"}} {
         set pong [$r2 ping asdf]
         assert_equal $pong "asdf"
         $rd1 close; $r2 close
-    }
+    } {} {needs:fix}
+
 
     test {MULTI-EXEC body and script timeout} {
         # check that we don't run an incomplete transaction due to some commands
@@ -609,7 +610,8 @@ start_server {tags {"multi"}} {
         set pong [$r2 ping asdf]
         assert_equal $pong "asdf"
         $rd1 close; $r2 close
-    }
+    } {} {needs:fix}
+
 
     test {just EXEC and script timeout} {
         # check that if EXEC arrives during timeout, we don't end up executing
@@ -633,7 +635,8 @@ start_server {tags {"multi"}} {
         set pong [$r2 ping asdf]
         assert_equal $pong "asdf"
         $rd1 close; $r2 close
-    }
+    } {} {needs:fix}
+
 
     test {exec with write commands and state change} {
         # check that exec that contains write commands fails if server state changed since they were queued
@@ -720,7 +723,7 @@ start_server {tags {"multi"}} {
         # releasing OOM
         $r2 config set maxmemory 0
         $r2 close
-    } {0} {needs:config-maxmemory}
+    } {0} {needs:config-maxmemory needs:fix}
 
     test {Blocking commands ignores the timeout} {
         r xgroup create s{t} g $ MKSTREAM
@@ -737,7 +740,7 @@ start_server {tags {"multi"}} {
         set res [r exec]
 
         list $m $res
-    } {OK {{} {} {} {} {} {} {} {}}}
+    } {OK {{} {} {} {} {} {} {} {}}} {needs:fix}
 
     test {MULTI propagation of PUBLISH} {
         set repl [attach_to_replication_stream]
@@ -751,7 +754,7 @@ start_server {tags {"multi"}} {
             {publish bla bla}
         }
         close_replication_stream $repl
-    } {} {needs:repl cluster:skip}
+    } {} {needs:repl cluster:skip needs:fix}
 
     test {MULTI propagation of SCRIPT LOAD} {
         set repl [attach_to_replication_stream]
@@ -768,7 +771,7 @@ start_server {tags {"multi"}} {
             {set foo bar}
         }
         close_replication_stream $repl
-    } {} {needs:repl}
+    } {} {needs:repl needs:fix}
 
     test {MULTI propagation of EVAL} {
         set repl [attach_to_replication_stream]

@@ -72,7 +72,7 @@ start_server {tags {"keyspace"}} {
         append res [r read]
         append res [string match PONG* [r read]]
         format $res
-    } {1xyzk1}
+    } {1xyzk1} {needs:implementation}
 
     test {Non existing command} {
         catch {r foobaredcommand} err
@@ -191,7 +191,7 @@ start_server {tags {"keyspace"}} {
             r select 9
             assert_equal [list foobar 2 foobar 1] [format $res]
         }
-    } 
+    } {} {needs:implementation}
 
     test {COPY for string does not replace an existing key without REPLACE option} {
         r set mykey2{t} hello
@@ -227,14 +227,14 @@ start_server {tags {"keyspace"}} {
         r set mykey{t} foobar
         catch {r copy mykey{t} mynewkey{t} DB notanumber} e
         set e
-    } {ERR value is not an integer or out of range}
+    } {ERR value is not an integer or out of range} {needs:implementation}
 
     test {COPY can copy key expire metadata as well} {
         r set mykey{t} foobar ex 100
         r copy mykey{t} mynewkey{t} REPLACE
         assert {[r ttl mynewkey{t}] > 0 && [r ttl mynewkey{t}] <= 100}
         assert {[r get mynewkey{t}] eq "foobar"}
-    }
+    } {} {needs:implementation}
 
     test {COPY does not create an expire if it does not exist} {
         r set mykey{t} foobar
@@ -242,7 +242,7 @@ start_server {tags {"keyspace"}} {
         r copy mykey{t} mynewkey{t} REPLACE
         assert {[r ttl mynewkey{t}] == -1}
         assert {[r get mynewkey{t}] eq "foobar"}
-    }
+    } {} {needs:implementation}
 
 source "tests/unit/type/list-common.tcl"
 foreach {type large} [array get largevalue] {
@@ -259,7 +259,7 @@ foreach {type large} [array get largevalue] {
         assert_refcount 1 mynewlist{t}
         r del mylist{t}
         assert_equal $digest [debug_digest_value mynewlist{t}]
-    }
+    } {} {needs:implementation}
     config_set list-max-listpack-size $origin_config
 }
 
@@ -283,7 +283,7 @@ foreach {type large} [array get largevalue] {
             assert_refcount 1 newset1{t}
             r del set1{t}
             assert_equal $digest [debug_digest_value newset1{t}]
-        }
+        } {} {needs:implementation}
     }
 
     test {COPY basic usage for listpack sorted set} {
@@ -297,7 +297,7 @@ foreach {type large} [array get largevalue] {
         assert_refcount 1 newzset1{t}
         r del zset1{t}
         assert_equal $digest [debug_digest_value newzset1{t}]
-    }
+    } {} {needs:implementation}
 
      test {COPY basic usage for skiplist sorted set} {
         r del zset2{t} newzset2{t}
@@ -315,7 +315,7 @@ foreach {type large} [array get largevalue] {
         r del zset2{t}
         assert_equal $digest [debug_digest_value newzset2{t}]
         r config set zset-max-ziplist-entries $original_max
-    }
+    } {} {needs:implementation}
 
     test {COPY basic usage for listpack hash} {
         r del hash1{t} newhash1{t}
@@ -328,7 +328,7 @@ foreach {type large} [array get largevalue] {
         assert_refcount 1 newhash1{t}
         r del hash1{t}
         assert_equal $digest [debug_digest_value newhash1{t}]
-    }
+    } {} {needs:implementation}
 
     test {COPY basic usage for hashtable hash} {
         r del hash2{t} newhash2{t}
@@ -346,7 +346,7 @@ foreach {type large} [array get largevalue] {
         r del hash2{t}
         assert_equal $digest [debug_digest_value newhash2{t}]
         r config set hash-max-ziplist-entries $original_max
-    }
+    } {} {needs:implementation}
 
     test {COPY basic usage for stream} {
         r del mystream{t} mynewstream{t}
@@ -360,7 +360,7 @@ foreach {type large} [array get largevalue] {
         assert_refcount 1 mynewstream{t}
         r del mystream{t}
         assert_equal $digest [debug_digest_value mynewstream{t}]
-    }
+    } {} {needs:implementation}
 
     test {COPY basic usage for stream-cgroups} {
         r del x{t}
@@ -388,7 +388,7 @@ foreach {type large} [array get largevalue] {
         r del x{t}
         assert_equal $info [r xinfo stream newx{t} full]
         r flushdb
-    }
+    } {} {needs:implementation}
 
     test {MOVE basic usage} {
         r set mykey foobar

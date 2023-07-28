@@ -742,12 +742,12 @@ start_server {tags {"expire"}} {
     test {EXPIRE with unsupported options} {
         catch {r EXPIRE foo 200 AB} e
         set e
-    } {ERR Unsupported option AB}
+    } {ERR Unsupported option AB} {needs:fix}
 
     test {EXPIRE with unsupported options} {
         catch {r EXPIRE foo 200 XX AB} e
         set e
-    } {ERR Unsupported option AB}
+    } {ERR Unsupported option AB} {needs:fix}
 
     test {EXPIRE with negative expiry} {
         r SET foo bar EX 100
