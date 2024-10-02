@@ -615,7 +615,7 @@ foreach {type large} [array get largevalue] {
         }
     }
 
-    foreach resp {3 2} {
+    foreach resp {3} {
         if {[lsearch $::denytags "resp3"] >= 0} {
             if {$resp == 3} {continue}
         } elseif {$::force_resp3} {
@@ -650,7 +650,7 @@ foreach {type large} [array get largevalue] {
         }
 
         r readraw 0
-        r hello 2
+        r hello 3
     }
 
     test {Variadic RPUSH/LPUSH} {

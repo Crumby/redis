@@ -265,6 +265,8 @@ proc redis_deferring_client {args} {
         $client read
     } else {
         # For timing/symmetry with the above select
+        $client auth admin admin
+        $client read
         $client ping
         $client read
     }
@@ -284,6 +286,7 @@ proc redis_client {args} {
     # select the right db and read the response (OK), or at least ping
     # the server if we're in a singledb mode.
     if {$::singledb} {
+        $client auth admin admin
         $client ping
     } else {
         $client select 9
